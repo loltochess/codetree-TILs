@@ -11,6 +11,10 @@ vector<int> knight_matrix[34]; // {좌상단 row 좌하단 row 좌상단 col, �
 int hp_first[34]; //처음체력
 int hp[34]; // 현재체력
 int dead[34]; // 죽었나요?
+
+int will_move[34];
+int can_first_move = 0;
+
 vector<int> move_direction[4] = {
 	{-1, -1, 0, 0},
 	{0, 0, 1, 1},
@@ -79,6 +83,7 @@ int check(int index, int direction) {// 재귀적으로 check 받아서 확인�
 	move_knight(temp, direction); //temp가 이동한 matrix가 된다. 지역변수라서 알아서사라진다.
 	if (is_wall(temp)) {
 		//cout << index << " matrix can't move to " << direction <<" because of wall" << "\n";
+		can_first_move += 10000;
 		return 0; // 이동할수 없다면 false(0) return.
 	}
 
@@ -111,7 +116,8 @@ int check(int index, int direction) {// 재귀적으로 check 받아서 확인�
 	
 	if (index_going_to_move.size() == 0) { // tree의 leaf node일 때 
 		//cout << index << " matrix can move direction " << direction << " but don't know about its siblings." << " \n";
-		return 2; //leaf node라면 2 리턴
+		will_move[index] = 1;
+		return 2; 
 	}
 
 	int will_move[40];
@@ -124,7 +130,7 @@ int check(int index, int direction) {// 재귀적으로 check 받아서 확인�
 			temptemp.push_back(knight_matrix[idx][j]);
 		}
 		if (check(idx, direction) == 2) {
-			will_move[idx] = 1; cnt++;
+			cnt++;
 		}
 		else if (check(idx, direction) == 1) {
 			cnt++;
@@ -132,10 +138,8 @@ int check(int index, int direction) {// 재귀적으로 check 받아서 확인�
 	}
 	
 	if (cnt == index_going_to_move.size()) {
-		for (auto idx : index_going_to_move) {
-			if(will_move[idx] == 1) real_move_knight(idx, direction);
-		}
-		real_move_knight(index, direction);
+		//real_move_knight(index, direction);
+		will_move[index] = 1;
 		return 1; // leaf node가 아닌 자식 node는 1로 리턴한다.
 	}
 
@@ -166,10 +170,17 @@ int main() {
 
 	for (int i = 0; i < Q; i++) {
 		//cout << i + 1 << " turn " << "\n";
+		memset(will_move, 0, sizeof(will_move));
+		can_first_move = 0;
 		int idx, d;
 		cin >> idx >> d;
 		if (!dead[idx]) {// 죽은 knight가 아니라면 옮길수있다
-			if (check(idx, d)) { // 처음 민 놈은 회복시켜준다. 죽었다면 살려준다.
+			if (check(idx, d)) { // 처음 민 놈은 데미지안입음!
+				if (can_first_move == 0) {
+					for (int i = 1; i <= N; i++) {
+							real_move_knight(i, d);
+					}
+				}
 				int heal = count_trap(knight_matrix[idx]);
 				//cout << idx << " matrix 가 함정을 " << heal << "개 밟았으므로 처음놈은 회복시켜준다." << "\n";
 				if (dead[idx]) dead[idx] = 0;
