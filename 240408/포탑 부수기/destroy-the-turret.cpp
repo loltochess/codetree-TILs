@@ -74,10 +74,11 @@ pair<int,int> find_attack_tower() {
 	return v[0].second;
 }
 
-pair<int, int> find_attacked_tower() {
+pair<int, int> find_attacked_tower(pair<int,int> from) {
 	vector< pair< pair<int, int>, pair<int, int> > > v;
 	for (int i = 1; i <= N; i++) {
 		for (int j = 1; j <= M; j++) {
+			if (i == from.first && j == from.second) continue;
 			if (land[i][j]) {
 				v.push_back({ {land[i][j], attack_record[i][j]}, {i,j} });
 			}
@@ -127,7 +128,7 @@ bool laser(pair<int, int> from, pair<int, int> to) {
 			if (nx < 1) nx = M;
 			if (nx > M) nx = 1;
 			//cout << ny << " " << nx << " 확인" << "\n";
-			if (land[ny][nx] == 0) continue;
+			if (land[ny][nx] == 0 ) continue;
 			if (!visited[ny][nx]) {
 				prev[ny][nx] = { y, x };
 				visited[ny][nx] = visited[y][x] + 1;
@@ -145,6 +146,7 @@ bool laser(pair<int, int> from, pair<int, int> to) {
 	int half_damage = damage / 2;
 
 	// to 제외 나머지 경로는 절반만 데미지들어감.
+	// to 에서 역추적해서 from까지
 	pair<int, int> now = to;
 	while(now != from){
 		int y = now.first, x = now.second;
@@ -164,6 +166,7 @@ void bomb(pair<int, int> from, pair<int, int> to) {
 	int half_damage = damage / 2;
 	//첫 데미지 계산
 	land[to.first][to.second] -= damage;
+	if (land[to.first][to.second] < 0) land[to.first][to.second] = 0;
 	attacked_record[to.first][to.second] = turn;
 	//8자 데미지 계산 from 은 제외
 	for (int i = 0; i < 8; i++) {
@@ -217,9 +220,10 @@ int main() {
 
 	int turn = 1;
 	while (turn <= K) {
+		//cout << turn << " turn " << "\n";
 		pair<int, int> from = find_attack_tower();
-		pair<int, int> to = find_attacked_tower();
-		land[from.first][from.second] += N + M;
+		land[from.first][from.second] += (N + M); //공격력증가
+		pair<int, int> to = find_attacked_tower(from);
 		if (!laser(from, to)) bomb(from, to);
 		heal();
 		//print_graph(land);
