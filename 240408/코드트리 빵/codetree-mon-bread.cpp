@@ -159,7 +159,7 @@ bool check() {
 }
 
 int main() {
-	freopen("input.txt", "r", stdin);
+	//freopen("input.txt", "r", stdin);
 	
 	cin >> n >> m;
 	for (int i = 1; i <= n; i++) {
