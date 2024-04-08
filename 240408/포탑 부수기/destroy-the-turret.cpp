@@ -13,7 +13,7 @@ int attack_record[14][14];
 int attacked_record[14][14];
 
 // turn 으로 attack attacked 포탑 파악
-int turn = 1;
+int cnt = 0;
 
 const int laser_dy[4] = { 0, 1, 0, -1 };
 const int laser_dx[4] = { 1, 0, -1, 0 };
@@ -54,13 +54,14 @@ bool compare_attacked_tower(pair< pair<int, int>, pair<int, int> > a, pair< pair
 	return a.second.second < b.second.second; // col
 }
 
-pair<int,int> find_attack_tower() {
+pair<int, int> find_attack_tower() {
+	cnt++;
 	// { {공격력, 최근공격}, {i, j} } vector생성
-	vector< pair< pair<int, int>, pair<int, int> > > v; 
+	vector< pair< pair<int, int>, pair<int, int> > > v;
 	for (int i = 1; i <= N; i++) {
 		for (int j = 1; j <= M; j++) {
 			if (land[i][j]) {
-				v.push_back({ {land[i][j], attack_record[i][j]}, {i,j}});
+				v.push_back({ {land[i][j], attack_record[i][j]}, {i,j} });
 			}
 		}
 	}
@@ -69,12 +70,12 @@ pair<int,int> find_attack_tower() {
 	//attack_record update
 	int y = v[0].second.first;
 	int x = v[0].second.second;
-	attack_record[y][x] = turn;
+	attack_record[y][x] = cnt;
 
 	return v[0].second;
 }
 
-pair<int, int> find_attacked_tower(pair<int,int> from) {
+pair<int, int> find_attacked_tower(pair<int, int> from) {
 	vector< pair< pair<int, int>, pair<int, int> > > v;
 	for (int i = 1; i <= N; i++) {
 		for (int j = 1; j <= M; j++) {
@@ -111,7 +112,7 @@ void __init__(int visited[14][14], pair<int, int> prev[14][14]) {
 
 bool laser(pair<int, int> from, pair<int, int> to) {
 	int visited[14][14];
-	pair<int,int> prev[14][14];
+	pair<int, int> prev[14][14];
 	__init__(visited, prev); // 초기화
 	queue<pair<int, int>> q;
 	q.push({ from.first, from.second });
@@ -128,7 +129,7 @@ bool laser(pair<int, int> from, pair<int, int> to) {
 			if (nx < 1) nx = M;
 			if (nx > M) nx = 1;
 			//cout << ny << " " << nx << " 확인" << "\n";
-			if (land[ny][nx] == 0 ) continue;
+			if (land[ny][nx] == 0) continue;
 			if (!visited[ny][nx]) {
 				prev[ny][nx] = { y, x };
 				visited[ny][nx] = visited[y][x] + 1;
@@ -137,6 +138,7 @@ bool laser(pair<int, int> from, pair<int, int> to) {
 			}
 		}
 	}
+	//cout << "bfs result" << "\n";
 	//print_graph(visited);
 	// 경로못찾음
 	if (!visited[to.first][to.second]) return false;
@@ -147,17 +149,27 @@ bool laser(pair<int, int> from, pair<int, int> to) {
 
 	// to 제외 나머지 경로는 절반만 데미지들어감.
 	// to 에서 역추적해서 from까지
+	int route[14][14];
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= M; j++) {
+			route[i][j] = 0;
+		}
+	}
+	route[from.first][from.second] = 1;
 	pair<int, int> now = to;
-	while(now != from){
+	while (now != from) {
 		int y = now.first, x = now.second;
 		pair<int, int> prev_tower = prev[y][x];
 		int prev_y = prev_tower.first, prev_x = prev_tower.second;
 		if (now == to) land[y][x] -= damage;
 		else land[y][x] -= half_damage; // 데미지 계산
 		if (land[y][x] < 0) land[y][x] = 0; //사망처리
-		attacked_record[y][x] = turn; // 기록
+		attacked_record[y][x] = cnt; // 기록
+		route[y][x] = visited[y][x]; // 디버깅용
 		now = prev_tower; // 다음 타워로
 	}
+	//cout << "route " << "\n";
+	//print_graph(route);
 	return true;
 }
 
@@ -167,7 +179,7 @@ void bomb(pair<int, int> from, pair<int, int> to) {
 	//첫 데미지 계산
 	land[to.first][to.second] -= damage;
 	if (land[to.first][to.second] < 0) land[to.first][to.second] = 0;
-	attacked_record[to.first][to.second] = turn;
+	attacked_record[to.first][to.second] = cnt;
 	//8자 데미지 계산 from 은 제외
 	for (int i = 0; i < 8; i++) {
 		int y = to.first + bomb_dy[i];
@@ -179,7 +191,7 @@ void bomb(pair<int, int> from, pair<int, int> to) {
 		if (x > M) x = 1;
 		if (land[y][x] > 0) {
 			land[y][x] -= half_damage;
-			attacked_record[y][x] = turn;
+			attacked_record[y][x] = cnt;
 			if (land[y][x] < 0) land[y][x] = 0;
 		}
 	}
@@ -190,8 +202,8 @@ void heal() {
 	for (int i = 1; i <= N; i++) {
 		for (int j = 1; j <= M; j++) {
 			if (land[i][j] &&
-				attack_record[i][j] != turn &&
-				attacked_record[i][j] != turn) {
+				attack_record[i][j] != cnt &&
+				attacked_record[i][j] != cnt) {
 				land[i][j]++;
 			}
 		}
@@ -210,7 +222,7 @@ int find_max() {
 
 int main() {
 	//freopen("input.txt", "r", stdin);
-	
+
 	cin >> N >> M >> K;
 	for (int i = 1; i <= N; i++) {
 		for (int j = 1; j <= M; j++) {
@@ -218,13 +230,23 @@ int main() {
 		}
 	}
 
+	pair<pair<int, int>, pair<int, int>> a = { {155, 10} , {10,1} };
+	pair<pair<int, int>, pair<int, int>> b = { {155, 0} , {9,9} };
+	//cout << compare_attack_tower(a, b) << "\n";
+
 	int turn = 1;
 	while (turn <= K) {
 		//cout << turn << " turn " << "\n";
+		//print_graph(land);
+		//print_graph(attack_record);
 		pair<int, int> from = find_attack_tower();
 		land[from.first][from.second] += (N + M); //공격력증가
 		pair<int, int> to = find_attacked_tower(from);
-		if (!laser(from, to)) bomb(from, to);
+		//cout << from.first << " " << from.second << " to " << to.first << " " << to.second << "\n\n";
+		if (!laser(from, to)) {
+			//cout << "laser missed" << "\n";
+			bomb(from, to);
+		}
 		heal();
 		//print_graph(land);
 		turn++;
