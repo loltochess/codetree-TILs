@@ -175,7 +175,6 @@ int main() {
 	}
 
 	while (1) {
-		if (t >= 10) return 2;
 		//cout << t << " turn starts" << "\n";
 		//debug_print();
 		move();
