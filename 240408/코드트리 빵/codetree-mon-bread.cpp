@@ -44,7 +44,35 @@ void debug_print() {
 }
 
 int calc_dist(pair<int, int> a, pair<int, int> b) {
-	return abs(a.first - b.first) + abs(a.second - b.second);
+	int sy = a.first, sx = a.second, ey = b.first, ex = b.second;
+	queue<pair<int,int>> q;
+	int visited[18][18];
+	memset(visited, 0, sizeof(visited));
+	q.push(a);
+	visited[sy][sx] = 1;
+	while (q.size()) {
+		pair<int, int> point = q.front();
+		q.pop();
+		int y = point.first, x = point.second;
+		for (int i = 0; i < 4; i++) {
+			int ny = y + dy[i];
+			int nx = x + dx[i];
+			if (blocked[ny][nx]) continue;
+			if (visited[ny][nx]) continue;
+			if (ny < 1 || ny > n || nx < 1 || nx > n) continue;
+			visited[ny][nx] = visited[y][x] + 1;
+			q.push({ ny, nx });
+		}
+	}
+	//cout << "bfs result " << a.first << " " << a.second << " to " << b.first << " " << b.second << "\n";
+	//for (int i = 1; i <= n; i++) {
+	//	for (int j = 1; j <= n; j++) {
+	//		cout << visited[i][j] << " ";
+	//	}
+	//	cout << "\n";
+	//}
+	//cout << "\n";
+	return visited[ey][ex]; //못찾았으면 0 리턴
 }
 
 void move() { 
@@ -59,7 +87,8 @@ void move() {
 			if (blocked[ny][nx]) continue;
 			if (ny < 1 || ny > n || nx < 1 || nx > n) continue;
 			pair<int, int> new_point = make_pair(ny, nx);
-			int new_dist = calc_dist(new_point, object[i]);
+			int new_dist = calc_dist(new_point, object[i]); // 시작 끝
+			if (new_dist == 0) continue;
 			if (new_dist < dist) {
 				dist = new_dist; now_location[i] = new_point;
 			}
@@ -67,6 +96,7 @@ void move() {
 			if (now_location[i] == object[i]) {
 				will_block[ny][nx] = true;
 				finished[i] = true; 
+				now_location[i] = { -1, -1 };
 				break;
 			}
 		}
@@ -100,7 +130,8 @@ void base_go() {
 	for (int i = 0; i < base.size(); i++) {
 		int by = base[i].first, bx = base[i].second;
 		if (!blocked[by][bx]) {
-			int dist = calc_dist(store, base[i]);
+			int dist = calc_dist(base[i], store); // 시작 끝
+			if (dist == 0) continue;
 			int flag = false;
 			if (dist < min_dist) flag = true;
 			else if (dist == min_dist) {
@@ -122,14 +153,13 @@ void base_go() {
 
 bool check() {
 	for (int i = 1; i <= m; i++) {
-		pair<int, int> person = now_location[i];
-		if (person != object[i]) return false;
+		if (!finished[i]) return false;
 	}
 	return true;
 }
 
 int main() {
-	//freopen("input.txt", "r", stdin);
+	freopen("input.txt", "r", stdin);
 	
 	cin >> n >> m;
 	for (int i = 1; i <= n; i++) {
