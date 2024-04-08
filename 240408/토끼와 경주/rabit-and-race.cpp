@@ -43,8 +43,8 @@ pair<LL, LL> move(rabbit a, LL dir) {
 	LL ny = a.y, nx = a.x;
 	delta_y = abs(a.dist * dy[dir]);
 	delta_x = abs(a.dist * dx[dir]);
-	//delta_y = delta_y % (N + ny - 1);
-	//delta_x = delta_x % (M + nx - 1);
+	delta_y = delta_y % (2*(N-1));
+	delta_x = delta_x % (2*(M-1));
 	while (1) { // delta y 또는 delta x 가 0이 될 때까지
 		if (dir == 0) { // ny  <- a.y 에서 얼마나 더 상승할거냐?
 			if (delta_y <= ny - 1) {
