@@ -92,6 +92,11 @@ int count_kill_trees(int y, int x) {
 	return cnt;
 }
 
+bool cmp(pair<int, int> a, pair<int, int> b) {
+	if (a.first != b.first) return a.first > b.first;
+	return a.second > b.second;
+}
+
 void kill() {
 	int max_tree = -1;
 	pair<int, int> max_point = { 0, 0 };
@@ -102,11 +107,16 @@ void kill() {
 				if (max_tree < cnt) {
 					max_tree = cnt; max_point = make_pair(i, j);
 				}
+				else if (max_tree == cnt) {
+					if (cmp(max_point, make_pair(i, j))) {
+						max_point = make_pair(i, j);
+					}
+				}
 			}
 		}
 	}
 	// ret 에 죽여버릴 tree 수 더해주기
-	ret += max_tree;
+	ret += max_tree > 0 ? max_tree : 0;
 	// 포인트를 찾고 실제로 kill 하자.
 	int y = max_point.first, x = max_point.second;
 	land[y][x] = -(c+1); // c+1년 후 0으로 회복된다!
@@ -115,9 +125,11 @@ void kill() {
 			int ny = y + j * chem_dy[i];
 			int nx = x + j * chem_dx[i];
 			if (ny<1 || ny>n || nx<1 || nx>n) break;
-			if (land[ny][nx] <= 0) {
-				land[ny][nx] = -c; break; // 뿌려주고 break
+			if (land[ny][nx] < -(c + 1)) break; // 벽에는 뿌리지 않음에 유의한다.
+			if (land[ny][nx] <= 0) { //제초제가 뿌려졌거나, 나무가 없는 땅
+				land[ny][nx] = -(c+1); break; // 뿌려주고 break
 			}
+			//나무가 있는 칸
 			land[ny][nx] = -(c+1); // 나무있는 칸은 다음 칸도 전파
 		}
 	}
@@ -154,7 +166,7 @@ int main() {
 		}
 	}
 	
-	//int turn = 1; // 디버깅용
+	int turn = 1; // 디버깅용
 
 	while (m--) {
 		//cout << turn << "turn starts " << "\n";
