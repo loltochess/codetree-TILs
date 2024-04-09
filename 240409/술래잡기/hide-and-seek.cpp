@@ -94,6 +94,22 @@ void chaser_move_cw() {
 	chaser.y = ny;
 	chaser.x = nx;
 	chaser.dir = new_dir;
+	visited_cw[chaser.y][chaser.x] = true;
+	return;
+}
+
+void chaser_move_ccw() {
+	int new_dir = chaser.dir;
+	int ny = chaser.y + dy[chaser.dir], nx = chaser.x + dx[chaser.dir];
+	bool change_dir = false;
+	int ky = ny + dy[new_dir], kx = nx + dx[new_dir];
+	if (ky < 1 || ky > n || kx < 1 || kx > n) change_dir = true;
+	if (visited_ccw[ky][kx]) change_dir = true;
+	if (change_dir) new_dir = (new_dir + 3) % 4;
+	chaser.y = ny;
+	chaser.x = nx;
+	chaser.dir = new_dir;
+	visited_ccw[chaser.y][chaser.x] = true;
 	return;
 }
 
@@ -122,15 +138,17 @@ void chase() {
 	if (chaser_cw) { // 시계방향이동
 		chaser_move_cw();
 		if (chaser.y == 1 && chaser.x == 1) { // (1,1) 도달
-			chaser.dir = (chaser.dir + 2) % 4;
-			__init__cw(); // 그동안 왔던 cw 경로 초기화
+			chaser.dir = 2;
+			__init__ccw(); 
+			chaser_cw = false;
 		}
 	}
 	else {
-		chaser_move_cw();
+		chaser_move_ccw();
 		if (chaser.y == (n / 2 + 1) && chaser.x == (n / 2 + 1)) {
-			chaser.dir == (chaser.dir + 2) % 4;
-			__init__ccw();
+			chaser.dir = 0;
+			__init__cw();
+			chaser_cw = true;
 		}
 	}
 	catch_runner();
