@@ -54,10 +54,10 @@ void swap_node(int idx1, int idx2) {
 	int temp_idx2 = idx2;
 	int one_parent = Nodes[idx1].parent;
 	int two_parent = Nodes[idx2].parent;
-	int one_child_left = Nodes[idx1].left;
-	int one_child_right = Nodes[idx1].right;
-	int two_child_left = Nodes[idx2].left;
-	int two_child_right = Nodes[idx2].right;
+	//int one_child_left = Nodes[idx1].left;
+	//int one_child_right = Nodes[idx1].right;
+	//int two_child_left = Nodes[idx2].left;
+	//int two_child_right = Nodes[idx2].right;
 
 	if (Nodes[one_parent].left == temp_idx1) { // left일 때
 		if (Nodes[two_parent].left == temp_idx2) {
@@ -83,10 +83,10 @@ void swap_node(int idx1, int idx2) {
 
 	Nodes[idx1].parent = two_parent;
 	Nodes[idx2].parent = one_parent;
-	Nodes[one_child_left].parent = temp_idx2;
-	Nodes[one_child_right].parent = temp_idx2;
-	Nodes[two_child_left].parent = temp_idx1;
-	Nodes[two_child_left].parent = temp_idx1;
+	//Nodes[one_child_left].parent = temp_idx2;
+	//Nodes[one_child_right].parent = temp_idx2;
+	//Nodes[two_child_left].parent = temp_idx1;
+	//Nodes[two_child_left].parent = temp_idx1;
 
 	return;
 }
