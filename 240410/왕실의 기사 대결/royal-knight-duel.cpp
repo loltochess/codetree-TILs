@@ -168,6 +168,7 @@ int main() {
 		cin >> idx >> dir;
 		//cout << "command : "<< idx << " " << dir << "\n";
 		//print_debug();
+		if (live[idx] == 0)continue;
 		memset(visited, 0, sizeof(visited));
 		if (can_move(idx, dir)) { // bfs
 			move(dir);
