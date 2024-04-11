@@ -26,6 +26,7 @@ monster dp[5][5][10]; // y, x, 회전방향
 
 queue<monster> egg;
 vector<monster> Monster;
+vector<monster> will_monster;
 
 int id = 1;
 int m, t;
@@ -36,7 +37,8 @@ void make_egg() {
 	for (int i = 1; i < Monster.size(); i++) { 
 		if (dead[i]) continue;
 		monster m = Monster[i];
-		egg.push({ m.y, m.x, m.dir });
+		will_monster.push_back({ m.y, m.x, m.dir });
+		//egg.push({ m.y, m.x, m.dir });
 	}
 	return;
 }
@@ -118,10 +120,14 @@ void torture_disappear() {
 }
 
 void dup_monster() {
-	while (egg.size()) {
-		monster m = egg.front(); egg.pop();
+	for (monster m : will_monster) {
 		Monster.push_back(m);
 	}
+	//while (egg.size()) {
+	//	monster m = egg.front(); egg.pop();
+	//	Monster.push_back(m);
+	//}
+	will_monster.clear();
 	return;
 }
 
@@ -184,10 +190,11 @@ int main() {
 		packman_move();
 		//print_debug();
 		torture_disappear();
+		if (t == 0) break;
 		dup_monster();
 		//print_debug();
 		turn++;
 	}
-	cout << count_monster() << "\n";
+	cout << count_monster() + will_monster.size() << "\n";
 	return 0;
 }
