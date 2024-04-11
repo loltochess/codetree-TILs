@@ -77,6 +77,7 @@ void snake() {
 	for (int i = 0; i < line.size(); i++) {
 		point = put_num[i];
 		land[point.first][point.second] = line[i];
+		//cout << point.first << " " << point.second << "\n";
 	}
 	// 마지막 포인트가 오른쪽에 오도록 하자.
 	int y = point.first, x = point.second;
@@ -89,6 +90,7 @@ void snake() {
 	//		else break;
 	//	}
 	//}
+	if (land[y][x + 1] == 0) return;
 	for (int ny = y; land[ny][x] != 0; ny++) { // 우하단 지점 찾기
 		y = ny;
 	}
@@ -247,8 +249,8 @@ void print_debug() {
 	cout << "\n";
 
 
-	for (int i = 0; i < 35; i++) {
-		for (int j = 0; j < 35; j++) {
+	for (int i = 0; i <=35; i++) {
+		for (int j = 0; j <=35; j++) {
 			cout << land[i][j] << " ";
 		}
 		cout << "\n";
@@ -286,6 +288,7 @@ int main() {
 	else if (fold_num % 4 == 1) dir = 2;
 	else if (fold_num % 4 == 2) dir = 1;
 	else dir = 0;
+	//cout << fold_num << " " << dir << "\n";
 	make_sequence(dir);
 
 	for (int i = 1; i <= n; i++) {
