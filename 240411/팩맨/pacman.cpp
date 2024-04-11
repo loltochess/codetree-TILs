@@ -7,9 +7,10 @@
 
 using namespace std;
 
+
 int dead[1000004];
-int torture[1000004];
 int land[6][6]; 
+int tort_land[6][6];
 const int dy[8] = {-1, -1, 0, 1, 1, 1, 0, -1 }; // 12시에서 시게반대
 const int dx[8] = {0, -1, -1, -1, 0, 1, 1, 1 };
 const int packman_dy[4] = { -1, 0, 1, 0 }; // 상좌하우
@@ -20,6 +21,8 @@ pair<int, int> packman;
 typedef struct monster {
 	int y, x, dir;
 } monster;
+
+monster dp[5][5][10]; // y, x, 회전방향
 
 queue<monster> egg;
 vector<monster> Monster;
@@ -38,20 +41,13 @@ void make_egg() {
 	return;
 }
 
-bool check_torture(int y, int x) {
-	for (int i = 1; i < Monster.size(); i++) {
-		if (y == Monster[i].y && x == Monster[i].x && torture[i] > 0) return true;
-	}
-	return false;
-}
-
 monster next_move(monster& m) { // 최종적으로 vector를 바꿔줌에 유의
 	int y = m.y, x = m.x, dir = m.dir;
 	for (int i = 0; i < 8; i++) {
 		int ndir = (dir + i) % 8;
 		int ny = y + dy[ndir], nx = x + dx[ndir];
 		if (ny < 1 || ny > 4 || nx < 1 || nx > 4) continue;
-		if (check_torture(ny, nx)) continue;
+		if (tort_land[ny][nx]) continue;
 		if (make_pair(ny, nx) == packman) continue;
 		y = ny, x = nx, dir = ndir; break;
 	}
@@ -64,7 +60,7 @@ void monster_move() { // land에 기록해놓자!
 	for (int idx = 1; idx < Monster.size(); idx++) {
 		if (dead[idx]) continue; 
 		monster m = Monster[idx];
-		m = next_move(m);
+		m = dp[m.y][m.x][m.dir];
 		Monster[idx] = m; // update
 		land[m.y][m.x]++;
 	}
@@ -75,7 +71,7 @@ void kill_monster(pair<int, int> packman) {
 	int y = packman.first, x = packman.second;
 	for (int i = 1; i < Monster.size(); i++) {
 		if (!dead[i] && y == Monster[i].y && x == Monster[i].x) {
-			dead[i] = 1; torture[i] = 3;
+			dead[i] = 1; tort_land[y][x] = 3;
 		}
 	}
 	return;
@@ -114,10 +110,11 @@ void packman_move() {
 }
 
 void torture_disappear() {
-	for (int i= 1; i < Monster.size(); i++) {
-		if (torture[i]) torture[i]--;
+	for (int i = 1; i <= 4; i++) {
+		for (int j = 1; j <= 4; j++) {
+			if (tort_land[i][j]) tort_land[i][j]--;
+		}
 	}
-	return;
 }
 
 void dup_monster() {
@@ -140,10 +137,23 @@ void print_debug() {
 	cout << "packman : " << packman.first << " " << packman.second << "\n";
 	cout << "monsters" << "\n";
 	for (int i = 1; i < Monster.size(); i++) {
-		cout << dead[i] << " " << torture[i] << " " << Monster[i].y << " " << Monster[i].x << " " << Monster[i].dir << "\n";
+		cout << dead[i] << " " << Monster[i].y << " " << Monster[i].x << " " << Monster[i].dir << "\n";
 	}
 	cout << "\n";
 	return;
+}
+
+void calculate_dp() {
+	memset(dp, -1, sizeof(dp));
+	for (int i = 1; i <= 4; i++) {
+		for (int j = 1; j <= 4; j++) {
+			for (int dir = 0; dir < 8; dir++) {
+				monster m = { i, j, dir };
+				m = next_move(m);
+				dp[i][j][dir] = m;
+			}
+		}
+	}
 }
 
 int main() {
@@ -160,6 +170,7 @@ int main() {
 	int turn = 1;
 	while (t--) {
 		//cout << turn << "turn starts" << "\n";
+		calculate_dp();
 		//print_debug();
 		make_egg();
 		monster_move();
