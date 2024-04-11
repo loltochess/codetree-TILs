@@ -90,7 +90,7 @@ void snake() {
 	//		else break;
 	//	}
 	//}
-	if (land[y][x + 1] == 0) return;
+	if (land[y][x + 1] == 0 && land[y-1][x] != 0) return;
 	for (int ny = y; land[ny][x] != 0; ny++) { // 우하단 지점 찾기
 		y = ny;
 	}
