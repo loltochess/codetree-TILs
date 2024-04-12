@@ -84,7 +84,7 @@ void move() {
 					break;
 				}
 			}
-			break;
+			continue;
 		}
 
 		int ey = L.end.first, ex = L.end.second;
