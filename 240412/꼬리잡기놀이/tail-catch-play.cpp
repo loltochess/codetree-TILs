@@ -84,6 +84,8 @@ void change_dir(pair<int,int> start) {
 			pair<int, int> temp = start;
 			L.start = L.end;
 			L.end = temp;
+			land[L.start.first][L.start.second] = 1;
+			land[L.end.first][L.end.second] = 3;
 			return;
 		}
 	}
@@ -92,7 +94,10 @@ void change_dir(pair<int,int> start) {
 
 int find_index(pair<int, int> point) {
 
-	if (land[point.first][point.second] == 1) return 1;
+	if (land[point.first][point.second] == 1) {
+		change_dir(point);
+		return 1;
+	}
 	
 	memset(visited, 0, sizeof(visited));
 	queue<pair<int, int>> q;
@@ -177,7 +182,9 @@ void print_debug() {
 		}
 		cout << "\n";
 	}
+	cout << "ret : " << ret << "\n";
 	cout << "\n";
+
 	return;
 }
 
@@ -205,10 +212,13 @@ int main() {
 	while (k--) {
 		//cout << turn << " turn starts " << "\n";
 		move();
+		//cout << "move end" << "\n";
+		//print_debug();
 		throw_ball(turn);
+		//cout << turn << " throw end" << "\n";
+		//print_debug();
 		turn++;
 		if (turn == 4 * n + 1) turn = 1;
-		//print_debug();
 	}
 	cout << ret << "\n";
 }
