@@ -53,6 +53,7 @@ void find_line(line& L) {
 void move() {
 	// start 랑 end만 update하면 아름답다!
 	for (line &L : Line) {
+		bool is_snake = false;
 		int sy = L.start.first, sx = L.start.second;
 		for (int i = 0; i < 4; i++) {
 			int sny = sy + dy[i], snx = sx + dx[i];
@@ -63,6 +64,27 @@ void move() {
 				land[sy][sx] = 2;
 				break;
 			}
+			else if (land[sny][snx] == 3) { // 휘감은 뱀 형태
+				is_snake = true; break;
+			}
+		}
+
+		if (is_snake) {
+			pair<int, int> end = L.end;
+			int ey = end.first, ex = end.second;
+			for (int j = 0; j < 4; j++) {
+				int eny = ey + dy[j], enx = ex + dx[j];
+				if (land[eny][enx] == 2) {
+					pair<int, int> start = L.start;
+					L.end = make_pair(eny, enx);
+					L.start = end;
+					land[eny][enx] = 3;
+					land[ey][ex] = 1;
+					land[sy][sx] = 2;
+					break;
+				}
+			}
+			break;
 		}
 
 		int ey = L.end.first, ex = L.end.second;
