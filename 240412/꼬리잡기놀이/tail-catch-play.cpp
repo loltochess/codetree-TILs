@@ -138,6 +138,7 @@ int find_index(pair<int, int> point) {
 				q.push(make_pair(ny, nx));
 			}
 			if (land[ny][nx] == 1) { // 시작점찾음.
+				if (land[y][x] == 3) continue; // is_snake일 때
 				start = make_pair(ny, nx);
 				visited[ny][nx] = visited[y][x] + 1;
 				break;
