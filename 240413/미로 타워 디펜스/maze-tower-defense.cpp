@@ -14,10 +14,11 @@ const int dy[4] = { 0, 1, 0 ,-1 }; // 우하좌상
 const int dx[4] = { 1, 0, -1, 0 };
 const int snake_dy[4] = { 0, 1, 0, -1 }; // 좌 하 우 상
 const int snake_dx[4] = { -1, 0, 1, 0 };
-int monster_line[700];
+int monster_line[1000];
 int visited[30][30];
 int p;
 int ret; 
+
 
 map<pair<int, int>, int > point_2_idx;
 
@@ -137,7 +138,7 @@ void tower_attack() {
 }
 
 void get_new_line() {
-	int temp[700];
+	int temp[1000];
 	memset(temp, 0, sizeof(temp));
 
 	vector<pair<int, int>> v;
@@ -208,10 +209,12 @@ int main() {
 	//print_debug();
 	int turn = 1;
 	while (m--) {
+		//cout << turn << " turn start " << "\n";
 		tower_attack();
 		get_new_line();
 		update_land();
 		//print_debug();
+		turn++;
 	}
 	cout << ret << "\n";
 }
