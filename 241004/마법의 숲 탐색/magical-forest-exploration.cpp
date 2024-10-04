@@ -63,18 +63,25 @@ void paint() {
 	land[y][x] = idx;
 	for (int i = 0; i < 4; i++) {
 		int ny = y + dy[i], nx = x + dx[i];
-		if (i == d) land[ny][nx] = 1e9 + idx;
-		else land[ny][nx] = idx;
+		land[ny][nx] = idx;
 	}
 }
 
-void checkConnected() {
+int visited[1004];
+
+void gogo(int idx) {
+	visited[idx] = 1;
+	int y, x, d;
+	y = g[idx].y; x = g[idx].x; d = g[idx].d;
+	max_y = max(max_y, y + 1 - 2);
+	y = y + dy[d]; x = x + dx[d];
 	for (int i = 0; i < 4; i++) {
 		int ny = y + dy[i], nx = x + dx[i];
-		if (land[ny][nx] == idx || land[ny][nx] == 0) continue;
-		int a = land[ny][nx];
-		if (a > 1e9) a -= 1e9;
-		max_y = max(max_y, spirit[a]);
+		if (i == (d + 2) % 4) continue;
+		if (is_out(ny, nx)) continue;
+		if (land[ny][nx] && visited[land[ny][nx]] == 0) {
+			gogo(land[ny][nx]);
+		}
 	}
 	return;
 }
@@ -97,9 +104,10 @@ void go() {
 	if (y <= 3) memset(land, 0, sizeof(land));
 	else {
 		paint();
-		max_y = y +1 -2; // 2만큼 빼줘야함.
-		y = y + dy[d]; x = x + dx[d];
-		if(land[y][x] > 1e9) checkConnected();
+		max_y = y + 1 - 2;
+		g[idx].y = y; g[idx].x = x; g[idx].d = d;
+		memset(visited, 0, sizeof(visited));
+		gogo(idx);
 		ret += max_y;
 		//cout << idx << " : " << max_y << " 더해요~" << '\n';
 		spirit[idx] = max_y;
