@@ -20,7 +20,7 @@ int max_depth[100004];
 int now_depth[100004];
 int ret;
 string query;
-vector<int> color_vec;
+vector<int> color_vec = { 0,0,0,0,0,0 };
 pii last_changed[100004]; // 최근에 변경된 time , color
 vector<int> root_m;
 vector<int> v;
@@ -93,7 +93,7 @@ void go(string query,int t) {
 			v.push_back(m);
 			parent[m] = p; child[p].push_back(m);
 			depth_update(m, 0);
-			color_vec = { 0, 0, 0, 0, 0, 0 };
+			for (int i = 1; i <= 5; i++) color_vec[i] = 0;
 			color_vec[color]++;
 			color_update(m, color_vec); // 자기자신부터 root 까지 root_color[m] 만큼 update
 			max_depth[m] = md;
@@ -103,6 +103,7 @@ void go(string query,int t) {
 	if (query == "200") {
 		cin >> m >> color;
 		int cnt = 0;
+		for (int i = 1; i <= 5; i++) color_vec[i] = 0;
 		for (int i = 1; i <= 5; i++) {
 			color_vec[i] = -root_color[m][i];
 			cnt += root_color[m][i];
@@ -119,14 +120,14 @@ void go(string query,int t) {
 	}
 	if (query == "300") {
 		cin >> m;
-		ans.push_back((ll)last_changed[m].second);
+		cout << last_changed[m].second << '\n';
 	}
 	if (query == "400") {
 		ll ret = 0;
 		for (int a : root_m) {
 			ret += dfs(a);
 		}
-		ans.push_back(ret);
+		cout << ret << '\n';
 	}
 }
 
