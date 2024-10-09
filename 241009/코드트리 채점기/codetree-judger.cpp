@@ -23,12 +23,12 @@ struct cmp{
 	}
 };
 
-map<string, pii> domainHistory; // domain -> {start , gap}
-map<int, Task> runningQ; // j_id -> {p,time,url}
+unordered_map<string, pii> domainHistory; // domain -> {start , gap}
+Task runningQ[50004]; // j_id -> {p,time,url}
 priority_queue<Task, vector<Task>, cmp> readyQ; // {p,time,url}
 vector<Task> bufferQ; // p,time,url
-map<string, int> domainRunning; // domain -> {0 or 1}
-map<string, int> urlReadyQ; // url -> {0,1} is in readyQ?
+unordered_map<string, int> domainRunning; // domain -> {0 or 1}
+unordered_map<string, int> urlReadyQ; // url -> {0,1} is in readyQ?
 priority_queue<int, vector<int>, greater<int>> nextMachine; // 쉬고있는놈중에 가장 숫자작은.
 
 int q, n, t, p, j_id;
@@ -36,7 +36,7 @@ string u;
 string query;
 vector<int> v;
 
-string getDomain(string u) {
+string getDomain(string& u) {
 	return u.substr(0,u.find('/'));
 }
 
