@@ -24,7 +24,7 @@ struct cmp{
 };
 
 unordered_map<string, pii> domainHistory; // domain -> {start , gap}
-Task runningQ[50004]; // j_id -> {p,time,url}
+unordered_map<int, Task> runningQ; // j_id -> {p,time,url}
 priority_queue<Task, vector<Task>, cmp> readyQ; // {p,time,url}
 vector<Task> bufferQ; // p,time,url
 unordered_map<string, int> domainRunning; // domain -> {0 or 1}
