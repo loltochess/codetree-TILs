@@ -26,12 +26,11 @@ typedef struct task {
 }Task;
 
 priority_queue<Task> pq[304];
-Task machineArray[50004];
+int machineDomain[50004];
 
 int s[304];
 int g[304];
 int e[304];
-int domainRunning[304];
 priority_queue<int, vector<int>, greater<int>> nextMachine;
 int q, n, t, p, j_id;
 string u;
@@ -76,8 +75,7 @@ void attempt() {
 	int min_domainIdx = 0;
 	int min_num = -1;
 	for (int i = 1; i < now_idx; i++) {
-		if (e[i] > t) continue; // 잦은 채점으로 불가능
-		if (domainRunning[i]) continue; // 채점중이므로 불가능
+		if (e[i] > t) continue; // 채점불가능
 
 		if (pq[i].size()) {
 			Task task = pq[i].top();
@@ -93,28 +91,25 @@ void attempt() {
 	if (min_domainIdx) { // 들어갈 곳이 있음
 		pq[min_domainIdx].pop();
 		int machine = nextMachine.top(); nextMachine.pop();
-		domainRunning[min_domainIdx] = 1;
 		domainUrlReadyQ[min_domainIdx][min_num] = 0;
-		machineArray[machine] = {min_domainIdx,t, min_num};
+		machineDomain[machine] = min_domainIdx;
 		ret--;
+		s[min_domainIdx] = t;
+		e[min_domainIdx] = 1e9;
 	}
 }
 
 void end_machine() {
 	cin >> t >> j_id;
-	if (machineArray[j_id].p == 0) return;
+	if (machineDomain[j_id] == 0) return;
 
-	int domainIdx = machineArray[j_id].p;
-	int start_t = machineArray[j_id].t;
-	int num = machineArray[j_id].num;
+	int domainIdx = machineDomain[j_id];
 
-	s[domainIdx] = start_t;
-	g[domainIdx] = t - start_t;
+	g[domainIdx] = t - s[domainIdx];
 	e[domainIdx] = s[domainIdx] + 3 * g[domainIdx];
 	
 	nextMachine.push(j_id);
-	domainRunning[domainIdx] = 0;
-	machineArray[j_id] = { 0, 0, 0 };
+	machineDomain[j_id] = 0;
 }
 
 int main() {
