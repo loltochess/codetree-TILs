@@ -70,32 +70,27 @@ void request() {
 void attempt() {
 	cin >> t;
 	if (nextMachine.size() == 0) return;
-	int min_p = 1e9;
-	int min_t = 1e9;
 	int min_domainIdx = 0;
-	int min_num = -1;
+	Task minTask;
+	minTask.p = 1e9 + 1;
 	for (int i = 1; i < now_idx; i++) {
 		if (e[i] > t) continue; // 채점불가능
 
 		if (pq[i].size()) {
 			Task task = pq[i].top();
-			if (min_p > task.p) {
-				min_p = task.p; min_t = task.t;
-				min_domainIdx = i; min_num = task.num;
-			}
-			else if (min_p == task.p && min_t > task.t) {
-				min_t = i; min_domainIdx = i; min_num = task.num;
+			if (minTask < task) {
+				minTask = task; min_domainIdx = i;
 			}
 		}
 	}
 	if (min_domainIdx) { // 들어갈 곳이 있음
 		pq[min_domainIdx].pop();
 		int machine = nextMachine.top(); nextMachine.pop();
-		domainUrlReadyQ[min_domainIdx][min_num] = 0;
+		domainUrlReadyQ[min_domainIdx][minTask.num] = 0;
 		machineDomain[machine] = min_domainIdx;
 		ret--;
 		s[min_domainIdx] = t;
-		e[min_domainIdx] = 1e9;
+		e[min_domainIdx] = 1e9 + 1;
 	}
 }
 
