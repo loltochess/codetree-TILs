@@ -39,7 +39,7 @@ string query;
 
 void machine_init() {
 	cin >> n >> u;
-	for (int i = 1; i <= 50000; i++) nextMachine.push(i);
+	for (int i = 1; i <= n; i++) nextMachine.push(i);
 	string domain = u.substr(0,u.find('/'));
 	if (domainToIdx[domain] == 0) {
 		domainToIdx[domain] = now_idx;
