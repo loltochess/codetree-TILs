@@ -5,114 +5,139 @@
 #include <queue>
 #include <vector>
 #include <map>
+#include <string>
 
 using namespace std;
 typedef long long ll;
 typedef pair<int, int> pii;
 void init() { ios_base::sync_with_stdio(0); cin.tie(NULL); cout.tie(NULL); }
 
+int now_idx = 1;
+map<string, int> domainToIdx; // domain -> domain idx
+map<int, int> domainUrlReadyQ[304]; // domain idx , number -> 있는지?
+
 typedef struct task {
-	int p, t;
-	string u;
+	int p, t, num;
+
+	bool operator < (const task& _t) const {
+		if (p != _t.p) return p > _t.p;
+		return t > _t.t;
+	}
 }Task;
 
-struct cmp{
-	bool operator()(Task a, Task b) {
-		if (a.p != b.p) return a.p > b.p;
-		return a.t > b.t;
-	}
-};
+priority_queue<Task> pq[304];
+Task machineArray[50004];
 
-unordered_map<string, pii> domainHistory; // domain -> {start , gap}
-unordered_map<int, Task> runningQ; // j_id -> {p,time,url}
-priority_queue<Task, vector<Task>, cmp> readyQ; // {p,time,url}
-vector<Task> bufferQ; // p,time,url
-unordered_map<string, int> domainRunning; // domain -> {0 or 1}
-unordered_map<string, int> urlReadyQ; // url -> {0,1} is in readyQ?
-priority_queue<int, vector<int>, greater<int>> nextMachine; // 쉬고있는놈중에 가장 숫자작은.
-
+int s[304];
+int g[304];
+int e[304];
+int domainRunning[304];
+priority_queue<int, vector<int>, greater<int>> nextMachine;
 int q, n, t, p, j_id;
 string u;
+int ret;
 string query;
-vector<int> v;
 
-string getDomain(string& u) {
-	return u.substr(0,u.find('/'));
+void machine_init() {
+	cin >> n >> u;
+	for (int i = 1; i <= 50000; i++) nextMachine.push(i);
+	string domain = u.substr(0,u.find('/'));
+	if (domainToIdx[domain] == 0) {
+		domainToIdx[domain] = now_idx;
+		now_idx++;
+	}
+	int idx = domainToIdx[domain];
+	int num = stoi(u.substr(u.find('/')+1,100));
+	domainUrlReadyQ[idx][num] = 1;
+	pq[idx].push({ 1,0,num });
+	ret++;
 }
 
-void go() {
-	cin >> query;
-	if (query == "100") {
-		cin >> n >> u;
-		for (int i = 1; i <= n; i++) nextMachine.push(i);
-		readyQ.push({ 1,0,u });
-		urlReadyQ[u] = 1;
+void request() {
+	cin >> t >> p >> u;
+	string domain = u.substr(0,u.find('/'));
+	if (domainToIdx[domain] == 0) {
+		domainToIdx[domain] = now_idx;
+		now_idx++;
 	}
-	if (query == "200") {
-		cin >> t >> p >> u;
-		if (urlReadyQ[u] != 0) {
-			return;
-		}
-		//cout << "추가됨." << '\n';
-		urlReadyQ[u] = 1;
-		readyQ.push({ p,t,u });
-	}
-	if (query == "300") {
-		cin >> t;
-		if (nextMachine.size() == 0) return; // 쉬는 기계없음.
-		int flag = true;
-		while (readyQ.size()) {
-			flag = true;
-			Task a = readyQ.top();
-			//cout << a.p << " : " << a.t << " : " << a.u << '\n';
-			string domain = getDomain(a.u);
-			if (domainRunning[domain]) flag = false;
-			if (domainHistory[domain].first + 3 * domainHistory[domain].second > t) flag = false;
-			if (flag) { // 사용가능
-				int machine = nextMachine.top();
-				nextMachine.pop();
-				readyQ.pop();
-				runningQ[machine] = { a.p, t, a.u };
-				urlReadyQ[a.u] = 0;
-				//cout << "사용가능 : " << a.p << " : " << t << " : " << a.u << '\n';
-				break;
+	int idx = domainToIdx[domain];
+	int num = stoi(u.substr(u.find('/')+1, 100));
+	if (domainUrlReadyQ[idx][num] == 1) return;
+	domainUrlReadyQ[idx][num] = 1;
+	pq[idx].push({ p,t,num });
+	ret++;
+}
+
+void attempt() {
+	cin >> t;
+	if (nextMachine.size() == 0) return;
+	int min_p = 1e9;
+	int min_t = 1e9;
+	int min_domainIdx = 0;
+	int min_num = -1;
+	for (int i = 1; i < now_idx; i++) {
+		if (e[i] > t) continue; // 잦은 채점으로 불가능
+		if (domainRunning[i]) continue; // 채점중이므로 불가능
+
+		if (pq[i].size()) {
+			Task task = pq[i].top();
+			if (min_p > task.p) {
+				min_p = task.p; min_t = task.t;
+				min_domainIdx = i; min_num = task.num;
 			}
-			else { // 불가능하므로 버퍼에 넣고 다음거 꺼내기.
-				bufferQ.push_back(a);
-				readyQ.pop();
+			else if (min_p == task.p && min_t > task.t) {
+				min_t = i; min_domainIdx = i; min_num = task.num;
 			}
 		}
-		while (bufferQ.size()) {
-			readyQ.push(bufferQ.back());
-			bufferQ.pop_back();
-		}
 	}
-	if (query == "400") {
-		cin >> t >> j_id;
-		Task nowTask = runningQ[j_id];
-		if (nowTask.p == 0) return; // 채점이 없음.
-		int gap = t - nowTask.t;
-		string domain = getDomain(nowTask.u);
-		domainHistory[domain] = { nowTask.t, gap };
-		//cout << domain << " : " << nowTask.t << " : " << nowTask.t + gap << '\n';
-		runningQ[j_id] = { 0, 0, "" }; // 없어~
-		domainRunning[domain] = 0;
-		nextMachine.push(j_id);
+	if (min_domainIdx) { // 들어갈 곳이 있음
+		pq[min_domainIdx].pop();
+		int machine = nextMachine.top(); nextMachine.pop();
+		domainRunning[min_domainIdx] = 1;
+		domainUrlReadyQ[min_domainIdx][min_num] = 0;
+		machineArray[machine] = {min_domainIdx,t, min_num};
+		ret--;
 	}
-	if (query == "500") {
-		cin >> t;
-		v.push_back((int)readyQ.size());
-	}
+}
+
+void end_machine() {
+	cin >> t >> j_id;
+	if (machineArray[j_id].p == 0) return;
+
+	int domainIdx = machineArray[j_id].p;
+	int start_t = machineArray[j_id].t;
+	int num = machineArray[j_id].num;
+
+	s[domainIdx] = start_t;
+	g[domainIdx] = t - start_t;
+	e[domainIdx] = s[domainIdx] + 3 * g[domainIdx];
+	
+	nextMachine.push(j_id);
+	domainRunning[domainIdx] = 0;
+	machineArray[j_id] = { 0, 0, 0 };
 }
 
 int main() {
 	init();
 	cin >> q;
 	for (int i = 0; i < q; i++) {
-		go();
+		cin >> query;
+		if (query == "100") {
+			machine_init();
+		}
+		if (query == "200") {
+			request();
+		}
+		if (query == "300") {
+			attempt();
+		}
+		if (query == "400") {
+			end_machine();
+		}
+		if (query == "500") {
+			cin >> t;
+			cout << ret << '\n';
+		}
 	}
-
-	for (int a : v) cout << a << '\n';
-	cout << '\n';
 	return 0;
 }
