@@ -49,7 +49,7 @@ void messengerInit() {
 
 void turnOnOff(int flag, int c) {
 	update(flag, c, authority[c]);
-	for (int i = 1; i <= 20; i++) {
+	for (int i = 1; i <= 21; i++) {
 		if (chat_room[c][i]) {
 			update(flag * chat_room[c][i], c, i);
 		}
@@ -78,22 +78,24 @@ void changePower() {
 void changeParent() {
 	int c_1, c_2;
 	cin >> c_1 >> c_2;
+    int a = alarm[c_1];
+    int b = alarm[c_2];
 
 	// swap 이전
-	if (alarm[c_1] == 0) {
+	if (a == 0) {
 		turnOnOff(-1, c_1);
 	}
-	if (alarm[c_2] == 0) {
+	if (b == 0) {
 		turnOnOff(-1, c_2);
 	}
 
 	swap(parent[c_1], parent[c_2]);
 
 	// swap 이후
-	if (alarm[c_2] == 0) {
+	if (a == 0) {
 		turnOnOff(1, c_1);
 	}
-	if (alarm[c_1] == 0) {
+	if (b == 0) {
 		turnOnOff(1, c_2);
 	}
 }
@@ -101,7 +103,7 @@ void changeParent() {
 void searchChatRoom() {
 	cin >> c;
 	int cnt = 0;
-	for (int i = 0; i <= 20; i++) {
+	for (int i = 0; i <= 21; i++) {
 		cnt += chat_room[c][i];
 	}
 	cout << cnt << '\n';
