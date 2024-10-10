@@ -22,11 +22,13 @@ int alarm[100004];
 void print();
 
 void update(int num, int idx, int power) {
+	if (alarm[idx]) return;
 	int p = parent[idx];
 	int cnt = 1;
 	while (p != -1 || power-cnt >= 0) {
 		chat_room[p][power - cnt] += num;
 		p = parent[p]; cnt++;
+		if (alarm[p]) return;
 	}
 }
 
@@ -55,9 +57,14 @@ void turnOnOff(int flag, int c) {
 
 void setAlarm() {
 	cin >> c;
+	if (alarm[c] == 0) {
+		turnOnOff(-1, c);
+	}
+	if (alarm[c] == 1) {
+		alarm[c] = 0;
+		turnOnOff(1, c);
+	}
 	alarm[c] ^= 1;
-	if (alarm[c] == 0) turnOnOff(1, c);
-	if (alarm[c] == 1) turnOnOff(-1, c);
 }
 
 void changePower() {
@@ -101,22 +108,22 @@ void searchChatRoom() {
 
 void print() {
 	cout << "노드부모" << '\n';
-	for (int i = 0; i <= 8; i++) {
+	for (int i = 0; i <= 10; i++) {
 		cout << parent[i] << ' ';
 	}
 	cout << '\n';
 	cout << "노드power" << '\n';
-	for (int i = 0; i <= 8; i++) {
+	for (int i = 0; i <= 10; i++) {
 		cout << authority[i] << ' ';
 	}
 	cout << '\n';
 	cout << "alarm 현황 " << '\n';
-	for (int i = 0; i <= 8; i++) {
+	for (int i = 0; i <= 10; i++) {
 		cout << alarm[i] << ' ';
 	}
 	cout << '\n';
 
-	for (int i = 0; i <= 8; i++) {
+	for (int i = 0; i <= 10; i++) {
 		cout << i << " 노드" << '\n';
 		for (int j = 0; j <= 3; j++) {
 			cout << chat_room[i][j] << " : ";
