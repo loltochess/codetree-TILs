@@ -26,9 +26,10 @@ void update(int num, int idx, int power) {
 	int p = parent[idx];
 	int cnt = 1;
 	while (p != -1 || power-cnt >= 0) {
+		int a = alarm[p];
 		chat_room[p][power - cnt] += num;
 		p = parent[p]; cnt++;
-		if (alarm[p]) return;
+		if (a == 1) return;
 	}
 }
 
