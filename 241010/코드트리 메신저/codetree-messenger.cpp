@@ -39,7 +39,7 @@ void messengerInit() {
 		cin >> p; parent[i] = p;
 	}
 	for (int i = 1; i <= n; i++) {
-		cin >> authority[i];
+		cin >> power; authority[i] = min(power, 20);
 	}
 	for (int i = 1; i <= n; i++) {
 		update(1, i, authority[i]);
@@ -60,12 +60,12 @@ void setAlarm() {
 	cin >> c;
 	if (alarm[c] == 0) {
 		turnOnOff(-1, c);
+		alarm[c] = 1;
 	}
-	if (alarm[c] == 1) {
+	else if (alarm[c] == 1) {
 		alarm[c] = 0;
 		turnOnOff(1, c);
 	}
-	alarm[c] ^= 1;
 }
 
 void changePower() {
