@@ -90,10 +90,10 @@ void changeParent() {
 	swap(parent[c_1], parent[c_2]);
 
 	// swap 이후
-	if (alarm[c_1] == 0) {
+	if (alarm[c_2] == 0) {
 		turnOnOff(1, c_1);
 	}
-	if (alarm[c_2] == 0) {
+	if (alarm[c_1] == 0) {
 		turnOnOff(1, c_2);
 	}
 }
@@ -109,24 +109,24 @@ void searchChatRoom() {
 
 void print() {
 	cout << "노드부모" << '\n';
-	for (int i = 0; i <= 10; i++) {
+	for (int i = 0; i <= 14; i++) {
 		cout << parent[i] << ' ';
 	}
 	cout << '\n';
 	cout << "노드power" << '\n';
-	for (int i = 0; i <= 10; i++) {
+	for (int i = 0; i <= 14; i++) {
 		cout << authority[i] << ' ';
 	}
 	cout << '\n';
 	cout << "alarm 현황 " << '\n';
-	for (int i = 0; i <= 10; i++) {
+	for (int i = 0; i <= 14; i++) {
 		cout << alarm[i] << ' ';
 	}
 	cout << '\n';
 
-	for (int i = 0; i <= 10; i++) {
+	for (int i = 0; i <= 14; i++) {
 		cout << i << " 노드" << '\n';
-		for (int j = 0; j <= 3; j++) {
+		for (int j = 0; j <= 4; j++) {
 			cout << chat_room[i][j] << " : ";
 		}
 		cout << '\n';
