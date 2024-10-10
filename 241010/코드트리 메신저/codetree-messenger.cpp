@@ -39,7 +39,7 @@ void messengerInit() {
 		cin >> p; parent[i] = p;
 	}
 	for (int i = 1; i <= n; i++) {
-		cin >> power; authority[i] = min(power, 20);
+		cin >> authority[i];
 	}
 	for (int i = 1; i <= n; i++) {
 		update(1, i, authority[i]);
