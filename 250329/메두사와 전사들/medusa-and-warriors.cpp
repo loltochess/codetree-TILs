@@ -47,56 +47,86 @@ bool is_out(int y, int x)
   return (y < 0 || y >= n || x < 0 || x >= n);
 }
 
-int go(int y, int x)
+int calc_dist()
 {
-  if (y == py && x == px) return park_dist[y][x] = 0;
-  
-  int& ret = park_dist[y][x];
-  if (ret != -1) return ret;
+  memset(park_dist, -1, sizeof(park_dist));
+  queue <pii> q;
+  q.push({my, mx});
+  park_dist[my][mx] = 0;
 
-  ret = 1e9;
+  while(q.size())
+  {
+    pii here = q.front(); q.pop();
+    int y = here.first;
+    int x = here.second;
+    if (y == py && x == px) return park_dist[y][x];
+    for (int i = 0; i < 8; i += 2)
+    {
+      int ny = y + dy[i];
+      int nx = x + dx[i];
+
+      if (is_out(ny, nx) || road[ny][nx] == 1) continue;
+
+      if (park_dist[ny][nx] == -1)
+      {
+        park_dist[ny][nx] = park_dist[y][x] + 1;
+        q.push({ny, nx});
+      }
+    }
+  }
+
+  return -1;
+}
+
+vector<pii> path;
+
+bool trace(vector<pii> v, int dist)
+{
+  if (v.size() == dist && v.back().first == py && v.back().second == px)
+  {
+    for (pii a : v)
+    {
+      path.push_back(a);
+    }
+    return true;
+  } 
+
+  int y, x;
+  if (v.size() == 0)
+  {
+    y = my; x = mx;
+  }
+  else 
+  {
+    y = v.back().first;
+    x = v.back().second;
+  }
+  
   for (int i = 0; i < 4; i++)
   {
     int dir = dirs[i][1];
     int ny = y + dy[dir];
     int nx = x + dx[dir];
-    if (is_out(ny, nx) || road[ny][nx] == 1) continue;
-    ret = min(ret, 1 + go(ny, nx));
+    if (is_out(ny, nx) || road[ny][nx] || park_dist[ny][nx] == -1) continue;
+    if (park_dist[y][x] + 1 != park_dist[ny][nx]) continue;
+    v.push_back({ny, nx});
+    if (trace(v, dist)) return true;
+    v.pop_back();
   }
-  
-  return ret;
+
+  return false;
 }
 
-void calc_dist()
+void medusa_move(int turn)
 {
-  memset(park_dist, -1, sizeof(park_dist));
-  go(my, mx);
-}
-
-void medusa_move()
-{
-  for (int i = 0; i < 4; i++)
+  tie(my, mx) = path[turn];
+  for (Warrior& w : warrior_vec)
   {
-    // 상 하 좌 우 순서.
-    int medusa_dir = dirs[i][1];
-    int ny = my + dy[medusa_dir];
-    int nx = mx + dx[medusa_dir];
-    if (is_out(ny, nx) || park_dist[ny][nx] == -1) continue;
-    // 최단경로 존재하는 경우만 구하는중.
-    if (park_dist[my][mx] == park_dist[ny][nx] + 1)
+    if (w.live == 0) continue;
+    if (w.y == my && w.x == mx)
     {
-      my = ny;
-      mx = nx;
-      for (Warrior& w : warrior_vec)
-      {
-        if (w.live == 0) continue;
-        if (w.y == my && w.x == mx)
-        {
-          w.live = 0;
-          warrior_land[w.y][w.x] -= 1;
-        }
-      }
-      return;
+      w.live = 0;
+      warrior_land[w.y][w.x] -= 1;
     }
   }
   return;
@@ -191,7 +221,7 @@ void medusa_look()
   //   }
   // }
 
-  //cout << max_freeze_cnt << " : " << max_freeze_dir << endl;
+  // cout << max_freeze_cnt << " : " << max_freeze_dir << endl;
 
   for (Warrior& w : warrior_vec)
   {
@@ -210,14 +240,14 @@ int man_calc_dist(int y1, int x1, int y2, int x2)
 }
 
 vector<int> warrior_dir[2] = {
-  {0, 4, 6, 2},
-  {6, 2, 0, 4}
+  {0, 4, 6, 2}, // 상 하 좌 우
+  {6, 2, 0, 4} // 좌 우 상 하 
 };
 
 void warrior_move(int flag)
 {
-  //cout << "이동시작!!!" << endl;
-  //cout << " 메두사는 " << " : " << my << " : " << mx << endl;
+  // cout << "이동시작!!!" << endl;
+  // cout << " 메두사는 " << " : " << my << " : " << mx << endl;
   for (Warrior& w : warrior_vec)
   {
     //cout << w.y << " : " << w.x << " : " << w.freeze << " :  " << w.live << endl;
@@ -233,7 +263,6 @@ void warrior_move(int flag)
     }
     for (int i = 0; i < 4; i++)
     {
-      // 상 하 좌 우
       int dir = warrior_dir[flag][i];
       int ny = w.y + dy[dir];
       int nx = w.x + dx[dir];
@@ -280,12 +309,15 @@ int main()
     }
   }
 
-  calc_dist();
-
-  if (park_dist[my][mx] == 1e9)
+  int a = calc_dist();
+  if (a == -1)
   {
-    cout << -1 << endl; exit(0);
+    cout << -1 << endl;
+    exit(0);
   }
+
+  vector<pii> v;
+  trace(v, a);
 
   // cout << endl;
   // for (int i = 0; i < n; i++)
@@ -307,11 +339,13 @@ int main()
   //   cout << endl;
   // }
   // cout << endl;
+  int turn = 0;
 
   while (1)
   {
     turn_info = {0, 0, 0};
-    medusa_move(); // 전사가 공격못하고 죽음
+    medusa_move(turn); // 전사가 공격못하고 죽음
+    //cout << my << " : " << mx << endl;
     if (my == py && mx == px)
     {
       cout << 0 << endl; return 0;
@@ -322,5 +356,6 @@ int main()
     cout << turn_info.warrior_move_sum << " " 
          << turn_info.warrior_freezed << " "
          << turn_info.warrior_attack_succeed << endl;
+    turn++;
   }
 }
