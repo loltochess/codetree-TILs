@@ -166,7 +166,7 @@ void medusa_look()
           }
           else
           {
-            if ( (ny - my) / (nx - mx) > 0)
+            if ( (double)(ny - my) / (nx - mx) > 0)
             {
               warrior_dir.push_back(look_dir[0]);
               warrior_dir.push_back(look_dir[1]);
@@ -179,7 +179,7 @@ void medusa_look()
           }
           warrior_q.push({ny, nx});
           while(warrior_q.size())
-          {
+          { 
             pii here = warrior_q.front(); warrior_q.pop();
             int y = here.first;
             int x = here.second;
